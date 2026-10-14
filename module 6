@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkSpire - Modern Full Stack Blog Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#fdf4f5', 500: '#e11d48', 600: '#be123c', 700: '#9f1239' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 flex flex-col justify-between">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <div>
+        <!-- Top Navigation Bar -->
+        <header class="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 glass-panel shadow-sm transition-colors">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+                        <i data-lucide="feather" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">InkSpire</span>
+                        <span class="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-semibold">Pro v2.5</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <button onclick="navigateTo('home')" class="nav-link text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition flex items-center gap-1.5">
+                        <i data-lucide="compass" class="w-4 h-4"></i> Explore
+                    </button>
+                    <button onclick="navigateTo('dashboard')" class="nav-link text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition flex items-center gap-1.5">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                    </button>
+                    <button onclick="navigateTo('deployment')" class="nav-link text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition flex items-center gap-1.5">
+                        <i data-lucide="rocket" class="w-4 h-4"></i> Deployment & README
+                    </button>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition" title="Toggle Theme">
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                        <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-600"></i>
+                    </button>
+
+                    <button onclick="openEditorModal()" class="hidden sm:flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-medium px-4 py-2 rounded-xl text-sm shadow-md shadow-rose-600/20 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Write Post
+                    </button>
+
+                    <div onclick="navigateTo('profile')" class="cursor-pointer flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                        <img id="header-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="User Profile" class="w-9 h-9 rounded-full object-cover ring-2 ring-rose-500/30">
+                    </div>
+
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 px-4 pt-3 pb-5 space-y-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+                <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <i data-lucide="compass" class="w-4 h-4"></i> Explore Feed
+                </button>
+                <button onclick="navigateTo('dashboard'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Author Dashboard
+                </button>
+                <button onclick="navigateTo('deployment'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <i data-lucide="rocket" class="w-4 h-4"></i> Deployment & README
+                </button>
+                <button onclick="navigateTo('profile'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <i data-lucide="user" class="w-4 h-4"></i> User Profile
+                </button>
+                <button onclick="openEditorModal(); toggleMobileMenu();" class="w-full text-center bg-rose-600 text-white py-2 rounded-xl text-sm font-medium shadow">
+                    + Write New Post
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Views -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- VIEW 1: HOME FEED -->
+            <div id="view-home" class="view-section space-y-10">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 p-8 sm:p-12 text-white shadow-xl">
+                    <div class="absolute -right-16 -top-16 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="relative z-10 max-w-2xl space-y-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured Stories & Insights
+                        </span>
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                            Where Ideas <span class="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">Ignite</span> & Stories Flourish.
+                        </h1>
+                        <p class="text-slate-300 text-base sm:text-lg">
+                            Explore insightful articles on web engineering, design systems, modern architecture, and developer productivity written by creators worldwide.
+                        </p>
+                        <div class="pt-2 flex flex-wrap gap-3">
+                            <button onclick="openEditorModal()" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-rose-600/30 transition flex items-center gap-2">
+                                <i data-lucide="pen-tool" class="w-4 h-4"></i> Start Writing Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="posts-grid" class="space-y-6">
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                        <div class="relative flex-1 max-w-md">
+                            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Search articles by title, tag, or author..." class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition shadow-sm">
+                        </div>
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="category-pills"></div>
+                    </div>
+
+                    <div id="featured-post-container" class="mb-8"></div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="book-open" class="w-5 h-5 text-rose-500"></i> Latest Articles
+                            </h2>
+                            <span id="post-count-badge" class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">0 posts</span>
+                        </div>
+                        <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                        <div id="empty-state" class="hidden text-center py-16 space-y-4">
+                            <div class="w-16 h-16 bg-rose-100 dark:bg-rose-950/50 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                                <i data-lucide="search-x" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-lg font-bold">No articles found</h3>
+                            <button onclick="resetFilters()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-medium shadow">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: POST DETAIL -->
+            <div id="view-detail" class="view-section hidden max-w-4xl mx-auto space-y-8">
+                <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Feed
+                </button>
+                <div id="detail-header" class="space-y-6">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span id="detail-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400"></span>
+                        <span class="text-slate-400">&bull;</span>
+                        <span id="detail-date" class="text-sm text-slate-500"></span>
+                        <span class="text-slate-400">&bull;</span>
+                        <span id="detail-readtime" class="text-sm text-slate-500 flex items-center gap-1"></span>
+                    </div>
+                    <h1 id="detail-title" class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-slate-900 dark:text-white"></h1>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-y border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center space-x-3">
+                            <img id="detail-author-avatar" src="" alt="Author" class="w-12 h-12 rounded-full object-cover ring-2 ring-rose-500/20">
+                            <div>
+                                <h4 id="detail-author-name" class="font-bold text-slate-900 dark:text-white"></h4>
+                                <p class="text-xs text-slate-500">Author & Contributor</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="handleLikePost()" id="detail-like-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-rose-50 text-slate-700 dark:text-slate-300 transition text-sm font-medium">
+                                <i data-lucide="heart" class="w-4 h-4 text-rose-500 fill-rose-500/20"></i>
+                                <span id="detail-likes-count">0</span> Likes
+                            </button>
+                            <button onclick="sharePost()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition" title="Share">
+                                <i data-lucide="share-2" class="w-4 h-4"></i>
+                            </button>
+                            <div id="detail-owner-actions" class="hidden flex items-center gap-2">
+                                <button onclick="editCurrentPost()" class="px-3 py-2 rounded-xl bg-amber-500/10 text-amber-600 text-sm font-medium">Edit</button>
+                                <button onclick="deleteCurrentPost()" class="px-3 py-2 rounded-xl bg-rose-500/10 text-rose-600 text-sm font-medium">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rounded-3xl overflow-hidden shadow-lg h-72 sm:h-96">
+                    <img id="detail-cover" src="" alt="Cover" class="w-full h-full object-cover">
+                </div>
+                <div id="detail-content" class="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed space-y-6 text-lg"></div>
+                <div id="detail-tags" class="flex flex-wrap gap-2 pt-4 border-t border-slate-200 dark:border-slate-800"></div>
+                <div class="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-6">
+                    <h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Comments (<span id="comment-count">0</span>)</h3>
+                    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <input type="text" id="comment-author-input" placeholder="Your Name" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm">
+                            <input type="email" id="comment-email-input" placeholder="Your Email (optional)" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm">
+                        </div>
+                        <textarea id="comment-body-input" rows="3" placeholder="Leave a constructive comment..." class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm"></textarea>
+                        <div class="flex justify-end">
+                            <button onclick="submitComment()" class="bg-rose-600 text-white font-medium px-5 py-2.5 rounded-xl text-sm shadow">Post Comment</button>
+                        </div>
+                    </div>
+                    <div id="comments-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: DASHBOARD -->
+            <div id="view-dashboard" class="view-section hidden space-y-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Author Dashboard</h1>
+                        <p class="text-slate-500 text-sm mt-1">Manage published posts and engagement metrics.</p>
+                    </div>
+                    <button onclick="openEditorModal()" class="bg-rose-600 text-white font-medium px-5 py-2.5 rounded-xl text-sm shadow flex items-center gap-2 self-start">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Create New Post
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div><p class="text-sm text-slate-500">Total Posts</p><h3 id="stat-total-posts" class="text-3xl font-extrabold mt-1">0</h3></div>
+                        <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center"><i data-lucide="file-text" class="w-6 h-6"></i></div>
+                    </div>
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div><p class="text-sm text-slate-500">Total Views</p><h3 id="stat-total-views" class="text-3xl font-extrabold mt-1">1,245</h3></div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="eye" class="w-6 h-6"></i></div>
+                    </div>
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div><p class="text-sm text-slate-500">Total Likes</p><h3 id="stat-total-likes" class="text-3xl font-extrabold mt-1">0</h3></div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="heart" class="w-6 h-6"></i></div>
+                    </div>
+                </div>
+                <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-800 font-bold">Your Articles</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-400 uppercase bg-slate-50 dark:bg-slate-950">
+                                    <th class="py-4 px-6">Title</th>
+                                    <th class="py-4 px-6">Category</th>
+                                    <th class="py-4 px-6">Date</th>
+                                    <th class="py-4 px-6">Likes</th>
+                                    <th class="py-4 px-6 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-posts-table" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: PROFILE -->
+            <div id="view-profile" class="view-section hidden max-w-2xl mx-auto space-y-8">
+                <div><h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">User Profile & Settings</h1></div>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <img id="profile-preview-avatar" src="" alt="Avatar" class="w-20 h-20 rounded-full object-cover ring-4 ring-rose-500/20">
+                        <div><h3 id="profile-preview-name" class="font-bold text-xl"></h3><p class="text-sm text-slate-500">Author Persona</p></div>
+                    </div>
+                    <div class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Display Name</label><input type="text" id="setting-name" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></div>
+                        <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Avatar URL</label><input type="text" id="setting-avatar" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></div>
+                        <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Bio</label><textarea id="setting-bio" rows="3" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></textarea></div>
+                        <div class="flex justify-end"><button onclick="saveProfileSettings()" class="bg-rose-600 text-white px-6 py-2.5 rounded-xl text-sm shadow">Save Profile</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: DEPLOYMENT & README -->
+            <div id="view-deployment" class="view-section hidden max-w-4xl mx-auto space-y-8">
+                <div><h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Deployment & README Guide</h1></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-bold">▲</div>
+                        <h3 class="font-bold text-lg">Vercel</h3>
+                        <p class="text-xs text-slate-500">Deploy instantly via Git integration or CLI using `vercel.json`.</p>
+                        <a href="https://vercel.com/new" target="_blank" class="block text-center py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium">Deploy on Vercel</a>
+                    </div>
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-teal-500 text-white flex items-center justify-center font-bold">N</div>
+                        <h3 class="font-bold text-lg">Netlify</h3>
+                        <p class="text-xs text-slate-500">Drag and drop the project folder or connect your repository.</p>
+                        <a href="https://app.netlify.com/drop" target="_blank" class="block text-center py-2.5 rounded-xl bg-teal-600 text-white text-sm font-medium">Deploy on Netlify</a>
+                    </div>
+                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">R</div>
+                        <h3 class="font-bold text-lg">Render</h3>
+                        <p class="text-xs text-slate-500">Host static web services with automated TLS certificates.</p>
+                        <a href="https://render.com" target="_blank" class="block text-center py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium">Deploy on Render</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-slate-500">
+            &copy; 2026 InkSpire Blog Platform. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- Editor Modal -->
+    <div id="editor-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 id="editor-modal-title" class="font-bold text-xl">Create Article</h3>
+                <button onclick="closeEditorModal()"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <input type="hidden" id="edit-post-id">
+                <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5">Title</label><input type="text" id="form-title" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5">Category</label>
+                        <select id="form-category" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm">
+                            <option value="Engineering">Engineering</option>
+                            <option value="Design">Design</option>
+                            <option value="AI & ML">AI & ML</option>
+                            <option value="Productivity">Productivity</option>
+                            <option value="Architecture">Architecture</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5">Cover Image URL</label><input type="text" id="form-cover" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></div>
+                </div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5">Tags</label><input type="text" id="form-tags" class="w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5">Body</label><textarea id="form-body" rows="8" class="w-full px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-950 text-sm"></textarea></div>
+            </div>
+            <div class="p-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 bg-slate-50 dark:bg-slate-950">
+                <button onclick="closeEditorModal()" class="px-5 py-2.5 rounded-xl border text-sm">Cancel</button>
+                <button onclick="savePostFromModal()" class="px-6 py-2.5 rounded-xl bg-rose-600 text-white text-sm shadow">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Script -->
+    <script src="script.js"></script>
+</body>
+</html>
